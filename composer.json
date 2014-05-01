@@ -12,8 +12,8 @@
   }
   ],
     "require":      {
-      "symfony/symfony":  ">=2.3"
-
+        "symfony/event-dispatcher": "2.4.*@dev",
+        "symfony/dependency-injection": "2.4.*@dev"
     },
     "require-dev": {
         "satooshi/php-coveralls": "dev-master"
