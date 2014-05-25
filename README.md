@@ -39,3 +39,6 @@ $listeners = $fetcher->fetchListeners($showPrivate);
 $filteredAndOrdered = $filter->filterByEvent($eventName, $listeners, $orderByPriorityAsc);
 ```
 
+---------------
+## Contributors
+The initial contributors to the foundations of this library can be found here in the bundle history.
