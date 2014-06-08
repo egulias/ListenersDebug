@@ -78,8 +78,8 @@ class ListenerFetcher
                     $listenersList[] = array(
                         $serviceId,
                         $listener['event'],
-                        $listener['method'],
-                        (isset($listener['priority'])) ? $listener['priority'] : 0,
+                        $this->getListenerMethod($listener),
+                        $this->getListenerPriority($listener),
                         'listener',
                         $definition->getClass()
                     );
@@ -129,6 +129,26 @@ class ListenerFetcher
         return $events;
     }
 
+    protected function getListenerMethod(array $listenerInfo)
+    {
+        $method = '';
+        if (isset($listenerInfo['method'])) {
+            $method = $listenerInfo['method'];
+        }
+
+        return $method;
+    }
+
+    protected function getListenerPriority(array $listenerInfo)
+    {
+        $priority = 0;
+        if (isset($listenerInfo['priority'])) {
+            $priority = $listenerInfo['priority'];
+        }
+
+        return $priority;
+    }
+
     protected function getIds()
     {
         $listenersIds = array();
@@ -148,6 +168,7 @@ class ListenerFetcher
                 $fullTags[$keys[0]] = $keys[0];
             }
         }
+
         foreach ($fullTags as $tag) {
             $services = $this->builder->findTaggedServiceIds($tag);
             foreach ($services as $id => $events) {
@@ -187,7 +208,6 @@ class ListenerFetcher
 
         return $this->builder->get($serviceId);
     }
-
 
     /**
      * Tell if a $class is an EventSubscriber

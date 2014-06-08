@@ -11,63 +11,116 @@ use Egulias\ListenersDebug\Listener\ListenerFetcher;
  */
 class ListenerFetcherTest extends \PHPUnit_Framework_TestCase
 {
-    public function testFetchListeners()
+    /**
+     * @dataProvider eventListenerDataProvider
+     */
+    public function testFetchListeners($eventData)
     {
         $defMock = $this->getMockBuilder('Symfony\Component\DependencyInjection\Definition')
-            ->disableOriginalConstructor()->getMock();
-        $defMock->expects($this->at(0))->method('getTags')->will(
-            $this->returnValue(array('test0.event_listener' => array('event' => 'test.event')))
+            ->disableOriginalConstructor()
+            ->getMock();
+        $defMock->expects($this->once())->method('getTags')->will(
+            $this->returnValue(array($eventData['name'] => array()))
         );
-        $defMock->expects($this->at(1))->method('getTags')->will(
-            $this->returnValue(array('test1.event_listener' => array('event' => 'test.event')))
-        );
-        $defMock->expects($this->at(2))->method('getTags')->will(
-            $this->returnValue(array('test2.event_listener' => array('event' => 'test.event')))
-        );
-        $defMock->expects($this->exactly(3))->method('isPublic')->will($this->returnValue(true));
-        $defMock->expects($this->any())->method('getClass')->will(
-            $this->returnValue('Egulias\ListenersDebug\Tests\Listener\Listener')
-        );
+        $defMock->expects($this->once())->method('isPublic')->will($this->returnValue(true));
+        $defMock->expects($this->any())
+            ->method('getClass')
+            ->will($this->returnValue('Egulias\ListenersDebug\Tests\Listener\Listener'));
 
         $containerMock = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerBuilder')
-            ->disableOriginalConstructor()->getMock();
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $containerMock->expects($this->once())->method('getDefinitions')
-            ->will($this->returnValue(array($defMock, $defMock, $defMock)));
+            ->will($this->returnValue(array($defMock)));
 
-        $containerMock->expects($this->exactly(3))->method('findTaggedServiceIds')->will(
-            $this->returnValue(
-                array(
-                    'test0.event_listener' => array(
-                        array(
-                            'event' => 'test.event', 'method' => 'onTestEvent', 'priority' => 4
-                        ),
-                    ),
-                    'test1.event_listener' => array(
-                        array(
-                            'event' => 'test.event', 'method' => 'onTestEvent', 'priority' => 2
-                        ),
-                    ),
-                    'test2.event_listener' => array( array())
-                )
-            )
-        );
+        $containerMock->expects($this->once())->method('findTaggedServiceIds')
+            ->will($this->returnValue(array(array($eventData['config']))));
 
         $containerMock->expects($this->any())->method('hasDefinition')->will($this->returnValue(true));
-        $containerMock->expects($this->exactly(3))->method('getDefinition')->will($this->returnValue($defMock));
+        $containerMock->expects($this->once())->method('getDefinition')->will($this->returnValue($defMock));
         $fetcher = new ListenerFetcher($containerMock);
         $listeners = $fetcher->fetchListeners();
 
-        $this->assertCount(3, $listeners);
-        $this->assertEquals('test.event', $listeners[0][1]);
-        $this->assertEquals('listener', $listeners[0][4]);
-        $this->assertEquals('subscriber', $listeners[2][4]);
+        $this->assertCount(6, $listeners[0]);
+        $this->assertEquals($eventData['expectations']['event'], $listeners[0][1]);
+        $this->assertEquals($eventData['expectations']['type'], $listeners[0][4]);
+        $this->assertEquals($eventData['expectations']['priority'], $listeners[0][3]);
+        $this->assertEquals('Egulias\ListenersDebug\Tests\Listener\Listener', $listeners[0][5]);
 
-        foreach ($listeners as $listener) {
-            $this->assertCount(6, $listener);
-            $this->assertEquals('test.event', $listener[1]);
-            $this->assertEquals('onTestEvent', $listener[2]);
-            $this->assertNotEquals(0, $listener[3]);
-        }
+    }
+
+    public function eventListenerDataProvider()
+    {
+        return array (
+            array(
+                array(
+                    'name' => 'test0.event_listener',
+                    'config' => array(
+                        'event' => 'test.event', 'method' => 'onTestEvent', 'priority' => 4
+                    ),
+                    'expectations' => array(
+                        'priority' => 4,
+                        'type' => 'listener',
+                        'event' => 'test.event',
+                        'method' => 'onTestEvent'
+                    )
+                )
+            ),
+            array(
+                array(
+                    'name' => 'test1.event_listener',
+                    'config' => array(
+                        'event' => 'test.event', 'method' => 'onTestEvent'
+                    ),
+                    'expectations' => array(
+                        'priority' => 0,
+                        'type' => 'listener',
+                        'event' => 'test.event',
+                        'method' => 'onTestEvent'
+                    )
+                )
+            ),
+            array(
+                array(
+                    'name' => 'test1.event_listener',
+                    'config' => array(
+                        'event' => 'test.event',
+                    ),
+                    'expectations' => array(
+                        'priority' => 0,
+                        'type' => 'listener',
+                        'event' => 'test.event',
+                        'method' => ''
+                    )
+                )
+            ),
+            array(
+                array(
+                    'name' => 'test1.event_listener',
+                    'config' => array(
+                        'event' => 'test.event', 'priority' => 2
+                    ),
+                    'expectations' => array(
+                        'priority' => 2,
+                        'type' => 'listener',
+                        'event' => 'test.event',
+                        'method' => ''
+                    )
+                )
+            ),
+            array(
+                array(
+                    'name' => 'test1.event_listener',
+                    'config' => 'test.event',
+                    'expectations' => array(
+                        'priority' => -2,
+                        'type' => 'subscriber',
+                        'event' => 'test.event',
+                        'method' => ''
+                    )
+                )
+            ),
+        );
     }
 }
