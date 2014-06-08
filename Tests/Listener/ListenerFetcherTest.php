@@ -112,7 +112,7 @@ class ListenerFetcherTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'name' => 'test1.event_listener',
-                    'config' => 'test.event',
+                    'config' => array('test.event'),
                     'expectations' => array(
                         'priority' => -2,
                         'type' => 'subscriber',
