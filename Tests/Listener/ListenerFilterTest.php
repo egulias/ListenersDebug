@@ -2,6 +2,8 @@
 
 namespace Egulias\ListenersDebug\Tests\Listener;
 
+use Egulias\ListenersDebug\Listener\Collection;
+use Egulias\ListenersDebug\Listener\Listener;
 use Egulias\ListenersDebug\Listener\ListenerFilter;
 
 /**
@@ -13,7 +15,16 @@ class ListenerFilterTest extends \PHPUnit_Framework_TestCase
 {
     public function testFilterEvent()
     {
-        $listeners = array(array(1 => 'event', 3 => 3), array(1 => 'event', 3 => 2), array(1 => 'other-event'));
+        $listener = new Listener();
+        $listener->service = 'egulias.test';
+        $listener->event = 'test.event';
+        $listener->method = 'onTestEvent';
+        $listener->priority = 0;
+        $listener->type = Listener::TYPE_SUBSCRIBER;
+        $listener->class = 'Listener';
+        $listeners = new Collection(array($listener));
+
+//        $listeners = array(array(1 => 'event', 3 => 3), array(1 => 'event', 3 => 2), array(1 => 'other-event'));
         $filter = new ListenerFilter();
 
         $filtered = $filter->filterByEvent('event', $listeners);

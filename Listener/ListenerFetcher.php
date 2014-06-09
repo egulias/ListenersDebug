@@ -33,36 +33,12 @@ class ListenerFetcher
             }
 
             if ($definition instanceof Definition) {
-                foreach ($this->listeners[$serviceId]['tag'] as $listener) {
-                    //this is probably an EventSubscriber
-                    if (!isset($listener['event'])) {
-                        $this->appendSubscribedEvents($definition, $serviceId);
-                        continue;
-                    }
-
-                    $listener = array(
-                        $serviceId,
-                        $listener['event'],
-                        $this->getListenerMethod($listener),
-                        $this->getListenerPriority($listener),
-                        'listener',
-                        $definition->getClass()
-                    );
-                    $this->listenersList->append($listener);
-                }
+                $this->appendDefinitionListeners($definition, $serviceId);
             } elseif ($definition instanceof Alias) {
-                $listener = array(
-                    $serviceId,
-                    'n/a',
-                    0,
-                    sprintf('<comment>alias for</comment> <info>%s</info>', (string) $definition),
-                    $definition->getClass()
-                );
-                $this->listenersList->append($listener);
+                $this->appendAliasListener($definition, $serviceId);
             }
         }
         return $this->listenersList;
-
     }
 
     public function fetchListener($serviceId)
@@ -94,6 +70,39 @@ class ListenerFetcher
         }
 
         return $events;
+    }
+
+    protected function appendDefinitionListeners(Definition $definition, $serviceId)
+    {
+        foreach ($this->listeners[$serviceId]['tag'] as $listenerData) {
+            //this is probably an EventSubscriber
+            if (!isset($listenerData['event'])) {
+                $this->appendSubscribedEvents($definition, $serviceId);
+                continue;
+            }
+
+            $listener = new Listener();
+            $listener->service = $serviceId;
+            $listener->event = $listenerData['event'];
+            $listener->method = $this->getListenerMethod($listenerData);
+            $listener->priority =  $this->getListenerPriority($listenerData);
+            $listener->type = Listener::TYPE_LISTENER;
+            $listener->class = $definition->getClass();
+
+            $this->listenersList->append($listener);
+        }
+    }
+
+    protected function appendAliasListener(Alias $definition, $serviceId)
+    {
+        $listener = array(
+            $serviceId,
+            'n/a',
+            0,
+            sprintf('Alias for %s', (string) $definition),
+            $definition->getClass()
+        );
+        $this->listenersList->append($listener);
     }
 
     protected function getListenerMethod(array $listenerInfo)
@@ -193,14 +202,12 @@ class ListenerFetcher
                 $event = array($event);
             }
 
-            $listener = array(
-                $serviceId,
-                $name,
-                $event[0],
-                $priority,
-                'subscriber',
-                $definition->getClass()
-            );
+            $listener = new Listener();
+            $listener->service = $serviceId;
+            $listener->event = $event[0];
+            $listener->priority = $priority;
+            $listener->type = Listener::TYPE_SUBSCRIBER;
+            $listener->class = $definition->getClass();
 
             $this->listenersList->append($listener);
         }
@@ -213,14 +220,15 @@ class ListenerFetcher
             $method = $property[0];
             $priority = $this->getSubscribedListenerPriority($property);
 
-            $listenersList[] = array(
-                $serviceId,
-                $eventName,
-                $method,
-                $priority,
-                'subscriber',
-                $class
-            );
+            $listener = new Listener();
+            $listener->service = $serviceId;
+            $listener->event = $eventName;
+            $listener->method = $method;
+            $listener->priority = $priority;
+            $listener->type = Listener::TYPE_SUBSCRIBER;
+            $listener->class = $class;
+
+            $listenersList[] = $listener;
         }
 
         return $listenersList;
@@ -234,5 +242,18 @@ class ListenerFetcher
         }
 
         return $priority;
+    }
+
+    protected function classIsEventSubscriber($class)
+    {
+        $reflectionClass = new \ReflectionClass($class);
+        $interfaces = $reflectionClass->getInterfaceNames();
+        foreach ($interfaces as $interface) {
+            if ($interface == 'Symfony\\Component\\EventDispatcher\\EventSubscriberInterface') {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

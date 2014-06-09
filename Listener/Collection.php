@@ -11,8 +11,8 @@ class Collection extends ArrayObject
 
     public function append($listener)
     {
-        if (!is_array($listener)) {
-            throw new InvalidArgumentException();
+        if (!$listener instanceof Listener) {
+            throw new InvalidArgumentException(get_class($listener));
         }
 
        $this->listeners[] = $listener;

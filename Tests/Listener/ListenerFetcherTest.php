@@ -42,12 +42,41 @@ class ListenerFetcherTest extends \PHPUnit_Framework_TestCase
         $fetcher = new ListenerFetcher($containerMock);
         $listeners = $fetcher->fetchListeners();
 
-        $this->assertCount(6, $listeners[0]);
-        $this->assertEquals($eventData['expectations']['event'], $listeners[0][1]);
-        $this->assertEquals($eventData['expectations']['type'], $listeners[0][4]);
-        $this->assertEquals($eventData['expectations']['priority'], $listeners[0][3]);
-        $this->assertEquals('Egulias\ListenersDebug\Tests\Listener\Listener', $listeners[0][5]);
+        $this->assertInstanceOf('Egulias\ListenersDebug\Listener\Collection', $listeners);
+        $this->assertInstanceOf('Egulias\ListenersDebug\Listener\Listener', $listeners[0]);
+        $this->assertEquals($eventData['expectations']['event'], $listeners[0]->event);
+        $this->assertEquals($eventData['expectations']['type'], $listeners[0]->type);
+        $this->assertEquals($eventData['expectations']['priority'], $listeners[0]->priority);
+    }
 
+    public function testDefinitionIsSubscriber()
+    {
+        $containerMock = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerBuilder')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $defMock = $this->getMockBuilder('Symfony\Component\DependencyInjection\Definition')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $defMock->expects($this->once())
+            ->method('getClass')
+            ->will($this->returnValue('Egulias\ListenersDebug\Tests\Listener\Listener'));
+        $fetcher = new ListenerFetcher($containerMock);
+        $this->assertTrue($fetcher->isSubscriber($defMock));
+    }
+
+    public function testDefinitionIsNotSubscriber()
+    {
+        $containerMock = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerBuilder')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $defMock = $this->getMockBuilder('Symfony\Component\DependencyInjection\Definition')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $defMock->expects($this->once())
+            ->method('getClass')
+            ->will($this->returnValue('Egulias\ListenersDebug\Listener\ListenerFetcher'));
+        $fetcher = new ListenerFetcher($containerMock);
+        $this->assertFalse($fetcher->isSubscriber($defMock));
     }
 
     public function eventListenerDataProvider()
