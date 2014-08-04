@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * This file is part of ListenersDebug
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Egulias\ListenersDebug\Listener;
 
 /**
@@ -25,6 +32,7 @@ class ListenerFilter
                     if ($asc) {
                         return ($a[3] >= $b[3]) ? 1 : -1;
                     }
+
                     return ($a[3] <= $b[3]) ? 1 : -1;
                 }
             );
