@@ -1,6 +1,15 @@
 <?php
 
+/**
+ * This file is part of ListenersDebug
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Egulias\ListenersDebug\Tests\Listener;
+
+use PHPUnit_Framework_TestCase;
 
 use Egulias\ListenersDebug\Listener\ListenerFilter;
 
@@ -9,7 +18,7 @@ use Egulias\ListenersDebug\Listener\ListenerFilter;
  *
  * @author Eduardo Gulias Davis <me@egulias.com>
  */
-class ListenerFilterTest extends \PHPUnit_Framework_TestCase
+class ListenerFilterTest extends PHPUnit_Framework_TestCase
 {
     public function testFilterEvent()
     {

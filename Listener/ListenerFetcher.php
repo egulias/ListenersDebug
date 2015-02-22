@@ -1,11 +1,23 @@
 <?php
 
+/**
+ * This file is part of ListenersDebug
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Egulias\ListenersDebug\Listener;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Definition;
 
+/**
+ * ListenerFetcher
+ *
+ * @author Eduardo Gulias Davis <me@egulias.com>
+ */
 class ListenerFetcher
 {
     const LISTENER_PATTERN = '/.+\.event_listener/';
@@ -94,6 +106,7 @@ class ListenerFetcher
                 );
             }
         }
+
         return $listenersList;
 
     }
@@ -193,7 +206,7 @@ class ListenerFetcher
     }
 
     /**
-     * @param string           $serviceId
+     * @param  string $serviceId
      * @return mixed
      */
     protected function resolveServiceDef($serviceId)

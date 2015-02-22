@@ -1,25 +1,28 @@
 {
-  "name":         "egulias/listeners-debug",
-  "description":  "Debug library for listeners registered in the Symfony 2 DIC",
-  "homepage":     "https://github.com/egulias/ListenersDebug.git",
-  "type":         "library",
-  "keywords":     ["listener", "events", "DIC", "DependencyInjection"],
-  "license":      "MIT",
-  "authors":      [
-  {
-    "name":     "Eduardo Gulias Davis",
-    "homepage": "http://egulias.com"
-  }
-  ],
-    "require":      {
+    "name": "egulias/listeners-debug",
+    "description": "Debug library for listeners registered in the Symfony 2 DIC",
+    "homepage": "https://github.com/egulias/ListenersDebug.git",
+    "type": "library",
+    "keywords": ["listener", "events", "DIC", "DependencyInjection"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name":     "Eduardo Gulias Davis",
+            "homepage": "http://egulias.com"
+        }
+    ],
+    "require": {
         "symfony/event-dispatcher": "~2.3",
         "symfony/dependency-injection": "~2.3"
     },
     "require-dev": {
+        "phpunit/phpunit": ">=3.7",
         "satooshi/php-coveralls": "dev-master"
     },
-    "autoload":     {
-      "psr-4": { "Egulias\\ListenersDebug\\": "" }
+    "autoload": {
+        "psr-4": {
+            "Egulias\\ListenersDebug\\": ""
+        }
     }
 }
 
